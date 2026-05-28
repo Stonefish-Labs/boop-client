@@ -294,7 +294,8 @@ fn visible_events(mut events: Vec<Event>) -> Vec<Event> {
         match (&lhs.status, &rhs.status) {
             (EventStatus::Pending, EventStatus::Pending)
             | (EventStatus::Resolved, EventStatus::Resolved)
-            | (EventStatus::Expired, EventStatus::Expired) => {}
+            | (EventStatus::Expired, EventStatus::Expired)
+            | (EventStatus::Cancelled, EventStatus::Cancelled) => {}
             (EventStatus::Pending, _) => return std::cmp::Ordering::Less,
             (_, EventStatus::Pending) => return std::cmp::Ordering::Greater,
             _ => {}
@@ -391,5 +392,20 @@ mod tests {
 
         assert_eq!(reducer.state.pending_counts_by_channel.get("default"), None);
         assert_eq!(reducer.state.events[0].status, EventStatus::Resolved);
+    }
+
+    #[test]
+    fn event_update_reduces_pending_count_when_cancelled() {
+        let mut reducer = StateReducer::new(Vec::new(), None, "default".to_string());
+        reducer.state.selected_channel_id = Some("default".to_string());
+        let pending = event("a", "default", EventStatus::Pending);
+        reducer.apply_refresh(None, Vec::new(), Vec::new(), vec![pending.clone()]);
+
+        let mut cancelled = pending;
+        cancelled.status = EventStatus::Cancelled;
+        reducer.apply_event_update(cancelled);
+
+        assert_eq!(reducer.state.pending_counts_by_channel.get("default"), None);
+        assert_eq!(reducer.state.events[0].status, EventStatus::Cancelled);
     }
 }

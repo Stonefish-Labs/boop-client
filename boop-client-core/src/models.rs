@@ -111,6 +111,7 @@ pub enum EventStatus {
     Pending,
     Resolved,
     Expired,
+    Cancelled,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
