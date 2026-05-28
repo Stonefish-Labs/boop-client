@@ -1,42 +1,48 @@
-# boop-client
+# Boop Client
 
-Native non-Apple clients for Boop.
+Native clients and local client runtime for Boop.
 
-## Layout
+## Projects
 
-```text
-boop-client-core/   Rust protocol/state/sync sidecar shared by desktop shells
-boop-windows/       Native WinUI 3 Windows client
-boop-linux/         Future Linux shell
-```
+- `boop-client-core`: Rust sidecar that owns enrollment, persistence, API calls, sync, and local state.
+- `boop-windows`: WinUI 3 Windows client that shells the Rust sidecar.
 
-The Windows app starts `boop-client-core` as a sidecar process and talks to it
-over NDJSON JSON-RPC. The sidecar owns server profiles, credential storage,
-HTTP API calls, websocket sync, and notification candidate events.
+## Prerequisites
 
-## Windows Build
+- .NET 10 SDK
+- Rust stable MSVC toolchain
+- Visual Studio or Build Tools with .NET desktop development, Desktop development with C++, and Windows SDK 10.0.19041 or newer
+- Windows App SDK runtime from Microsoft: https://learn.microsoft.com/windows/apps/windows-app-sdk/downloads
 
-Build the sidecar:
+## Build
+
+From this repository root:
 
 ```powershell
 cargo build --manifest-path .\boop-client-core\Cargo.toml --release
-```
-
-Build the WinUI app:
-
-```powershell
 dotnet restore .\boop-windows\src\Boop.Windows\Boop.Windows.csproj
 dotnet build .\boop-windows\src\Boop.Windows\Boop.Windows.csproj -c Debug -p:Platform=x64
 ```
 
-If the app cannot find the sidecar, set:
+The Windows project copies `boop-client-core\target\release\boop-client-core.exe` next to the app when the sidecar has been built. For development, you can also point the app at a sidecar explicitly:
 
 ```powershell
 $env:BOOP_CLIENT_CORE_PATH = "C:\path\to\boop-client\boop-client-core\target\release\boop-client-core.exe"
 ```
 
+Run the app with:
+
+```powershell
+dotnet run --project .\boop-windows\src\Boop.Windows\Boop.Windows.csproj -c Debug -p:Platform=x64
+```
+
+## Test
+
+```powershell
+cargo test --manifest-path .\boop-client-core\Cargo.toml
+dotnet build .\boop-windows\src\Boop.Windows\Boop.Windows.csproj -c Release -p:Platform=x64
+```
+
 ## Notes
 
-Windows notifications are local-first in v1: the app must be running or
-minimized to tray. WNS/Azure push and Linux UI work are deferred.
-
+The Windows client currently uses local Windows App SDK notifications. The app must be running or minimized to tray to receive local notifications; WNS push is not wired up yet.
