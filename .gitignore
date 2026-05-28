@@ -1,0 +1,13 @@
+.DS_Store
+
+# Rust
+target/
+boop-client-core/target/
+
+# Windows / .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+

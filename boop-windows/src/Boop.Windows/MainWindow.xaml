@@ -1,0 +1,115 @@
+<Window
+    x:Class="Boop.Windows.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Boop.Windows.Controls"
+    xmlns:models="using:Boop.Windows.Models">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <InfoBar
+            Grid.Row="0"
+            IsOpen="{Binding ErrorMessage, Converter={StaticResource NullToBoolConverter}}"
+            Severity="Error"
+            Title="Boop"
+            Message="{Binding ErrorMessage}" />
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="280" />
+                <ColumnDefinition Width="360" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" BorderThickness="0,0,1,0" BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Padding="16,14,16,10" Spacing="8">
+                        <TextBlock Text="Boop" FontSize="24" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding IsSyncConnected, Converter={StaticResource SyncStatusConverter}}" Opacity="0.65" />
+                    </StackPanel>
+
+                    <ScrollViewer Grid.Row="1">
+                        <StackPanel Padding="12" Spacing="18">
+                            <Expander Header="Servers" IsExpanded="True">
+                                <ListView ItemsSource="{Binding Servers}" SelectedItem="{Binding SelectedServer, Mode=TwoWay}" SelectionMode="Single">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                            </Expander>
+
+                            <Expander Header="Channels" IsExpanded="True">
+                                <ListView ItemsSource="{Binding Channels}" SelectedItem="{Binding SelectedChannel, Mode=TwoWay}" SelectionMode="Single">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid ColumnSpacing="8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                                                <Border Grid.Column="1" CornerRadius="9" MinWidth="22" Height="20" Background="{ThemeResource AccentFillColorDefaultBrush}" Visibility="{Binding PendingCount, Converter={StaticResource CountVisibilityConverter}}">
+                                                    <TextBlock Text="{Binding PendingCount}" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                            </Expander>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <StackPanel Grid.Row="2" Padding="12" Spacing="8">
+                        <Button Content="Refresh" Command="{Binding RefreshCommand}" HorizontalAlignment="Stretch" />
+                        <Button Content="Clear Channel" Command="{Binding ClearChannelCommand}" HorizontalAlignment="Stretch" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1" BorderThickness="0,0,1,0" BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}">
+                <ListView ItemsSource="{Binding Events}" SelectedItem="{Binding SelectedEvent, Mode=TwoWay}" SelectionMode="Single">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Padding="10" RowSpacing="4">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Grid.Row="1" Text="{Binding Summary}" Opacity="0.65" TextWrapping="Wrap" MaxLines="2" />
+                                <TextBlock Grid.Row="2" Text="{Binding CreatedRelative}" FontSize="12" Opacity="0.55" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Border>
+
+            <controls:EventDetailView Grid.Column="2" Event="{Binding SelectedEvent}" ViewModel="{Binding}" />
+
+            <Border Grid.ColumnSpan="3" Visibility="{Binding IsRegistered, Converter={StaticResource InverseBoolVisibilityConverter}}">
+                <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                    <StackPanel Width="420" Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="Register Device" FontSize="24" FontWeight="SemiBold" />
+                        <TextBox Header="Server URL" Text="{Binding ServerUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="https://your-server/boop" />
+                        <TextBox Header="Device Name" Text="{Binding DeviceName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Header="Enrollment Code" Text="{Binding EnrollmentCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="8" />
+                        <Button Content="Register" Command="{Binding RegisterCommand}" HorizontalAlignment="Stretch" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>
